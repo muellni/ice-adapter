@@ -4,17 +4,17 @@
 #  include <sys/socket.h>
 #  include <netinet/in.h>
 #  include <netinet/tcp.h>
-#  include <webrtc/rtc_base/physicalsocketserver.h>
+#  include "rtc_base/physicalsocketserver.h"
 #endif
 
-#include <webrtc/rtc_base/thread.h>
+#include "rtc_base/thread.h"
 
 #include "logging.h"
 
 namespace faf {
 
 JsonRpcServer::JsonRpcServer():
-  _server(rtc::Thread::Current()->socketserver()->CreateAsyncSocket(SOCK_STREAM))
+  _server(rtc::Thread::Current()->socketserver()->CreateAsyncSocket(AF_INET, SOCK_STREAM))
 {
 }
 
@@ -60,7 +60,7 @@ void JsonRpcServer::_onNewClient(rtc::AsyncSocket* socket)
   newConnectedSocket->SignalReadEvent.connect(this, &JsonRpcServer::_onRead);
   newConnectedSocket->SignalCloseEvent.connect(this, &JsonRpcServer::_onClientDisconnect);
   _connectedSockets.insert(std::make_pair(newConnectedSocket.get(), newConnectedSocket));
-  FAF_LOG_DEBUG << "JsonRpcServer client connected from " << accept_addr;
+  FAF_LOG_DEBUG << "JsonRpcServer client connected from " << accept_addr.ToString();
   SignalClientConnected.emit(newConnectedSocket.get());
 }
 

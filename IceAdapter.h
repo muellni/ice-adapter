@@ -3,8 +3,8 @@
 #include <queue>
 #include <memory>
 
-#include <webrtc/rtc_base/scoped_ref_ptr.h>
-#include <webrtc/api/peerconnectioninterface.h>
+#include "rtc_base/scoped_ref_ptr.h"
+#include "api/peerconnectioninterface.h"
 
 #include "IceAdapterOptions.h"
 #include "GPGNetServer.h"

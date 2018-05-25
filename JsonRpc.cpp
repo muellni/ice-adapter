@@ -177,15 +177,8 @@ void JsonRpc::_processJsonMessage(Json::Value const& jsonMessage, rtc::AsyncSock
         auto reqIt = _currentRequests.find(jsonMessage["id"].asInt());
         if (reqIt != _currentRequests.end())
         {
-          try
-          {
-            reqIt->second(jsonMessage.isMember("result") ? jsonMessage["result"] : Json::Value(),
-                          jsonMessage.isMember("error") ? jsonMessage["error"] : Json::Value());
-          }
-          catch (std::exception& e)
-          {
-            FAF_LOG_ERROR << "exception in request handler for id " << jsonMessage["id"].asInt() << ": " << e.what();
-          }
+          reqIt->second(jsonMessage.isMember("result") ? jsonMessage["result"] : Json::Value(),
+                        jsonMessage.isMember("error") ? jsonMessage["error"] : Json::Value());
           _currentRequests.erase(reqIt);
         }
       }
@@ -229,59 +222,45 @@ void JsonRpc::_processRequest(Json::Value const& request, ResponseCallback respo
   auto it = _callbacks.find(request["method"].asString());
   if (it != _callbacks.end())
   {
-    try
-    {
-      Json::Value result;
-      Json::Value error;
-      it->second(params, result, error, socket);
+    Json::Value result;
+    Json::Value error;
+    it->second(params, result, error, socket);
 
-      /* TODO: Better check for valid error/result combination */
-      if (!result.isNull())
-      {
-        response["result"] = result;
-      }
-      else if (!error.isNull())
-      {
-        response["error"] = error;
-      }
-      else
-      {
-        response["error"] = "invalid response";
-      }
-      responseCallback(response);
-      return;
-    }
-    catch (std::exception& e)
+    /* TODO: Better check for valid error/result combination */
+    if (!result.isNull())
     {
-      FAF_LOG_ERROR << "exception in callback for method '" << request["method"].asString() << "': " << e.what();
+      response["result"] = result;
     }
+    else if (!error.isNull())
+    {
+      response["error"] = error;
+    }
+    else
+    {
+      response["error"] = "invalid response";
+    }
+    responseCallback(response);
+    return;
   }
   else
   {
     auto itAsync = _callbacksAsync.find(request["method"].asString());
     if (itAsync != _callbacksAsync.end())
     {
-      try
-      {
-        itAsync->second(params,
-          [response, responseCallback](Json::Value result)
-          {
-            Json::Value r(response);
-            r["result"] = result;
-            responseCallback(r);
-          },
-          [response, responseCallback](Json::Value error)
-          {
-            Json::Value r(response);
-            r["error"] = error;
-            responseCallback(r);
-          },
-          socket);
-      }
-      catch (std::exception& e)
-      {
-        FAF_LOG_ERROR << "exception in callback for method '" << request["method"].asString() << "': " << e.what();
-      }
+      itAsync->second(params,
+        [response, responseCallback](Json::Value result)
+        {
+          Json::Value r(response);
+          r["result"] = result;
+          responseCallback(r);
+        },
+        [response, responseCallback](Json::Value error)
+        {
+          Json::Value r(response);
+          r["error"] = error;
+          responseCallback(r);
+        },
+        socket);
     }
     else
     {

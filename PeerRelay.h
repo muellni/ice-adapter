@@ -5,10 +5,10 @@
 #include <chrono>
 #include <array>
 
-#include <webrtc/api/peerconnectioninterface.h>
-#include <webrtc/rtc_base/copyonwritebuffer.h>
+#include "api/peerconnectioninterface.h"
+#include "rtc_base/copyonwritebuffer.h"
 
-#include <webrtc/third_party/jsoncpp/source/include/json/json.h>
+#include "json/json.h"
 
 #include "Timer.h"
 #include "PeerConnectivityChecker.h"

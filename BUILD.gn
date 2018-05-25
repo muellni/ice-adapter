@@ -1,0 +1,38 @@
+
+import("../webrtc.gni")
+
+rtc_executable("faf-ice-adapter") {
+
+  sources = [
+    "main.cpp",
+    "GPGNetServer.cpp",
+    "GPGNetMessage.cpp",
+    "IceAdapter.cpp",
+    "IceAdapterOptions.cpp",
+    "JsonRpc.cpp",
+    "JsonRpcServer.cpp",
+    "logging.cpp",
+    "PeerRelay.cpp",
+    "PeerRelayObservers.cpp",
+    "Timer.cpp",
+    "trim.cpp"
+  ]
+
+  include_dirs = [ "..",
+                   "$rtc_jsoncpp_root",
+  ]
+
+  suppressed_configs += [ "//build/config/clang:find_bad_constructs" ]
+
+  cflags_cc = [ "-std=c++14" ]
+
+  defines = [ "FAF_VERSION_STRING=\"6.2.3\"" ]
+
+  deps = [
+    "../rtc_base:rtc_json",
+    "../pc:peerconnection",
+    "../system_wrappers:field_trial_default",
+    "../system_wrappers:metrics_default",
+  ]
+}
+

@@ -1,7 +1,7 @@
 #include "Timer.h"
 
-#include <webrtc/rtc_base/bind.h>
-#include <webrtc/rtc_base/thread.h>
+#include "rtc_base/bind.h"
+#include "rtc_base/thread.h"
 
 #include "logging.h"
 

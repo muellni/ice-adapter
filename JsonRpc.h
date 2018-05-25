@@ -5,8 +5,8 @@
 #include <map>
 #include <functional>
 
-#include <webrtc/rtc_base/asyncsocket.h>
-#include <webrtc/third_party/jsoncpp/source/include/json/json.h>
+#include "rtc_base/asyncsocket.h"
+#include "json/json.h"
 
 namespace faf {
 

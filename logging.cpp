@@ -1,7 +1,7 @@
 #include "logging.h"
 
-#include "webrtc/rtc_base/logging.h"
-#include "webrtc/rtc_base/logsinks.h"
+#include "rtc_base/logging.h"
+#include "rtc_base/logsinks.h"
 
 namespace faf
 {

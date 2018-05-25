@@ -2,13 +2,16 @@
 
 #include <string>
 #include <functional>
-#include <webrtc/third_party/jsoncpp/source/include/json/json.h>
+#include <third_party/json/json.h>
 
 namespace faf
 {
 
 struct GPGNetMessage
 {
+  GPGNetMessage();
+  ~GPGNetMessage();
+
   std::string header; /*!< Message type like "CreateLobby" or "ConnectToPeer" */
   std::vector<Json::Value> chunks; /*!< parameters */
 

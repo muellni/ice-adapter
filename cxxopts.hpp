@@ -192,7 +192,7 @@ namespace cxxopts
   T
   toLocalString(T&& t)
   {
-    return t;
+    return std::move(t);
   }
 
   inline
@@ -434,14 +434,14 @@ namespace cxxopts
           {
             if (u > U(-std::numeric_limits<T>::min()))
             {
-              throw argument_incorrect_type(text);
+              //throw argument_incorrect_type(text);
             }
           }
           else
           {
             if (u > std::numeric_limits<T>::max())
             {
-              throw argument_incorrect_type(text);
+              //throw argument_incorrect_type(text);
             }
           }
         }
@@ -472,7 +472,7 @@ namespace cxxopts
 
       if (match.length() == 0)
       {
-        throw argument_incorrect_type(text);
+        //throw argument_incorrect_type(text);
       }
 
       if (match.length(4) > 0)
@@ -511,7 +511,7 @@ namespace cxxopts
 
         if (umax - digit < result * base)
         {
-          throw argument_incorrect_type(text);
+          //throw argument_incorrect_type(text);
         }
 
         result = result * base + digit;
@@ -523,7 +523,7 @@ namespace cxxopts
       {
         if (!is_signed)
         {
-          throw argument_incorrect_type(text);
+          //throw argument_incorrect_type(text);
         }
         value = -result;
       }
@@ -539,7 +539,7 @@ namespace cxxopts
       std::stringstream in(text);
       in >> value;
       if (!in) {
-        throw argument_incorrect_type(text);
+        //throw argument_incorrect_type(text);
       }
     }
 
@@ -669,6 +669,10 @@ namespace cxxopts
 
       standard_value(T* t)
       : m_store(t)
+      {
+      }
+
+      virtual ~standard_value()
       {
       }
 
@@ -919,7 +923,7 @@ namespace cxxopts
 
       if (iter == m_options.end())
       {
-        throw option_not_present_exception(option);
+        //throw option_not_present_exception(option);
       }
 
       return *iter->second;
@@ -1051,7 +1055,7 @@ namespace cxxopts
     {
       if (options.count(r) == 0)
       {
-        throw option_required_exception(r);
+        //throw option_required_exception(r);
       }
     }
   }
@@ -1193,7 +1197,7 @@ OptionAdder::operator()
 
   if (result.empty())
   {
-    throw invalid_option_format_error(opts);
+    //throw invalid_option_format_error(opts);
   }
 
   const auto& short_match = result[2];
@@ -1201,10 +1205,10 @@ OptionAdder::operator()
 
   if (!short_match.length() && !long_match.length())
   {
-    throw invalid_option_format_error(opts);
+    //throw invalid_option_format_error(opts);
   } else if (long_match.length() == 1 && short_match.length())
   {
-    throw invalid_option_format_error(opts);
+    //throw invalid_option_format_error(opts);
   }
 
   auto option_names = []
@@ -1265,7 +1269,7 @@ Options::checked_parse_arg
     }
     else
     {
-      throw missing_argument_exception(name);
+      //throw missing_argument_exception(name);
     }
   }
   else
@@ -1289,7 +1293,7 @@ Options::add_to_option(const std::string& option, const std::string& arg)
 
   if (iter == m_options.end())
   {
-    throw option_not_exists_exception(option);
+    //throw option_not_exists_exception(option);
   }
 
   parse_option(iter->second, option, arg);
@@ -1303,7 +1307,7 @@ Options::consume_positional(std::string a)
     auto iter = m_options.find(*m_next_positional);
     if (iter != m_options.end())
     {
-      if (!iter->second->value().is_container()) 
+      if (!iter->second->value().is_container())
       {
         if (iter->second->count() == 0)
         {
@@ -1395,7 +1399,7 @@ Options::parse(int& argc, char**& argv)
 
           if (iter == m_options.end())
           {
-            throw option_not_exists_exception(name);
+            //throw option_not_exists_exception(name);
           }
 
           auto value = iter->second;
@@ -1419,7 +1423,7 @@ Options::parse(int& argc, char**& argv)
             else
             {
               //error
-              throw option_requires_argument_exception(name);
+              //throw option_requires_argument_exception(name);
             }
           }
         }
@@ -1432,7 +1436,7 @@ Options::parse(int& argc, char**& argv)
 
         if (iter == m_options.end())
         {
-          throw option_not_exists_exception(name);
+          //throw option_not_exists_exception(name);
         }
 
         auto opt = iter->second;
@@ -1445,7 +1449,7 @@ Options::parse(int& argc, char**& argv)
           //but if it doesn't take an argument, this is an error
           if (!opt->has_arg())
           {
-            throw option_not_has_argument_exception(name, result[3]);
+            //throw option_not_has_argument_exception(name, result[3]);
           }
 
           parse_option(opt, name, result[3]);
@@ -1548,7 +1552,7 @@ Options::add_one_option
 
   if (!in.second)
   {
-    throw option_exists_error(option);
+    //throw option_exists_error(option);
   }
 }
 

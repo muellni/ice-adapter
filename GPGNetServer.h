@@ -4,9 +4,9 @@
 #include <string>
 #include <array>
 
-#include <webrtc/rtc_base/sigslot.h>
-#include <webrtc/rtc_base/asyncsocket.h>
-#include <webrtc/rtc_base/messagehandler.h>
+#include "rtc_base/sigslot.h"
+#include "rtc_base/asyncsocket.h"
+#include "rtc_base/messagehandler.h"
 
 #include "GPGNetMessage.h"
 

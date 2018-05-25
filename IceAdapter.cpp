@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-#include <webrtc/rtc_base/thread.h>
-#include <webrtc/api/mediaconstraintsinterface.h>
-#include <webrtc/api/test/fakeconstraints.h>
-#include <webrtc/third_party/jsoncpp/source/include/json/json.h>
-#include <webrtc/media/engine/webrtcmediaengine.h>
+#include "rtc_base/thread.h"
+#include "api/mediaconstraintsinterface.h"
+#include "api/test/fakeconstraints.h"
+#include <json/json.h>
+#include "media/engine/webrtcmediaengine.h"
 
 #include "logging.h"
 
@@ -37,7 +37,7 @@ IceAdapter::IceAdapter(IceAdapterOptions const& options):
   /* ICE adapter should determine lobby port. This may fail due to race conditions, but we can't pass a socket to the game */
   if (_lobbyPort == 0)
   {
-    auto serverSocket = rtc::Thread::Current()->socketserver()->CreateAsyncSocket(SOCK_DGRAM);
+    auto serverSocket = rtc::Thread::Current()->socketserver()->CreateAsyncSocket(AF_INET, SOCK_DGRAM);
     if (serverSocket->Bind(rtc::SocketAddress("127.0.0.1", 0)) != 0)
     {
       FAF_LOG_ERROR << "unable to bind udp server";
@@ -234,15 +234,8 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 1 parameter: mapName (string)";
       return;
     }
-    try
-    {
-      hostGame(paramsArray[0].asString());
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    hostGame(paramsArray[0].asString());
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("joinGame",
@@ -256,15 +249,8 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 2 parameters: remotePlayerLogin (string), remotePlayerId (int)";
       return;
     }
-    try
-    {
-      joinGame(paramsArray[0].asString(), paramsArray[1].asInt());
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    joinGame(paramsArray[0].asString(), paramsArray[1].asInt());
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("connectToPeer",
@@ -278,17 +264,10 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 3 parameters: remotePlayerLogin (string), remotePlayerId (int), createOffer (bool)";
       return;
     }
-    try
-    {
-      connectToPeer(paramsArray[0].asString(),
-                    paramsArray[1].asInt(),
-                    paramsArray[2].asBool());
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    connectToPeer(paramsArray[0].asString(),
+                  paramsArray[1].asInt(),
+                  paramsArray[2].asBool());
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("disconnectFromPeer",
@@ -302,15 +281,8 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 1 parameters: remotePlayerId (int)";
       return;
     }
-    try
-    {
-      disconnectFromPeer(paramsArray[0].asInt());
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    disconnectFromPeer(paramsArray[0].asInt());
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("setLobbyInitMode",
@@ -325,15 +297,8 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 1 parameters: initMode (string)";
       return;
     }
-    try
-    {
-      setLobbyInitMode(paramsArray[0].asString());
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    setLobbyInitMode(paramsArray[0].asString());
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("iceMsg",
@@ -348,16 +313,9 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 2 parameters: remotePlayerId (int), msg (object)";
       return;
     }
-    try
-    {
-      iceMsg(paramsArray[0].asInt(),
-             paramsArray[1]);
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    iceMsg(paramsArray[0].asInt(),
+           paramsArray[1]);
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("sendToGpgNet",
@@ -372,21 +330,14 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 2 parameters: header (string), chunks (array)";
       return;
     }
-    try
+    GPGNetMessage message;
+    message.header = paramsArray[0].asString();
+    for(std::size_t i = 0; i < paramsArray[1].size(); ++i)
     {
-      GPGNetMessage message;
-      message.header = paramsArray[0].asString();
-      for(std::size_t i = 0; i < paramsArray[1].size(); ++i)
-      {
-        message.chunks.push_back(paramsArray[1][Json::ArrayIndex(i)]);
-      }
-      sendToGpgNet(message);
-      result = "ok";
+      message.chunks.push_back(paramsArray[1][Json::ArrayIndex(i)]);
     }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
+    sendToGpgNet(message);
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("setIceServers",
@@ -401,16 +352,8 @@ void IceAdapter::_connectRpcMethods()
       error = "Need 1 parameters: iceServers (array) ";
       return;
     }
-    try
-    {
-      setIceServers(paramsArray[0]);
-      result = "ok";
-    }
-    catch(std::exception& e)
-    {
-      error = e.what();
-    }
-
+    setIceServers(paramsArray[0]);
+    result = "ok";
   });
 
   _jsonRpcServer.setRpcCallback("status",

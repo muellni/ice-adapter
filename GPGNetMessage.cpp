@@ -8,6 +8,13 @@
 namespace faf
 {
 
+GPGNetMessage::GPGNetMessage()
+{
+}
+GPGNetMessage::~GPGNetMessage()
+{
+}
+
 std::string GPGNetMessage::toBinary() const
 {
   std::string result;
@@ -78,7 +85,7 @@ void GPGNetMessage::parse(std::string& msgBuffer, std::function<void (GPGNetMess
     auto it = msgBuffer.begin();
 
     int32_t headerLength;
-    if ((msgBuffer.end() - it) <= sizeof(int32_t))
+    if (static_cast<std::size_t>(msgBuffer.end() - it) <= sizeof(int32_t))
     {
       return;
     }
@@ -90,29 +97,29 @@ void GPGNetMessage::parse(std::string& msgBuffer, std::function<void (GPGNetMess
     }
 
     GPGNetMessage message;
-    message.header = std::string(&*it, headerLength);
+    message.header = std::string(&*it, static_cast<std::size_t>(headerLength));
     it += headerLength;
 
     int32_t chunkCount;
-    if ((msgBuffer.end() - it) < sizeof(int32_t))
+    if (static_cast<std::size_t>(msgBuffer.end() - it) < sizeof(int32_t))
     {
       return;
     }
     std::memcpy(&chunkCount, &*it, sizeof (chunkCount));
     it += sizeof (int32_t);
-    message.chunks.resize(chunkCount);
+    message.chunks.resize(static_cast<std::size_t>(chunkCount));
 
-    for (int chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex)
+    for (std::size_t chunkIndex = 0; chunkIndex < static_cast<std::size_t>(chunkCount); ++chunkIndex)
     {
       int8_t type;
-      if ((msgBuffer.end() - it) < sizeof(int8_t))
+      if (static_cast<std::size_t>(msgBuffer.end() - it) < sizeof(int8_t))
       {
         return;
       }
       std::memcpy(&type, &*it, sizeof (int8_t));
       it += sizeof(int8_t);
       int32_t length;
-      if ((msgBuffer.end() - it) < sizeof(int32_t))
+      if (static_cast<std::size_t>(msgBuffer.end() - it) < sizeof(int32_t))
       {
         return;
       }
