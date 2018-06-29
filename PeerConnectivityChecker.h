@@ -1,11 +1,12 @@
 #pragma once
 
 #include <chrono>
-#include <optional>
 #include <functional>
+#include <string>
 
-#include <webrtc/api/datachannelinterface.h>
-#include <webrtc/rtc_base/messagehandler.h>
+#include "api/datachannelinterface.h"
+#include "rtc_base/messagehandler.h"
+#include "api/optional.h"
 
 #include "Timer.h"
 
@@ -22,15 +23,15 @@ public:
 
   bool handleMessageFromPeer(const uint8_t* data, std::size_t size);
 
-  static constexpr uint8_t PingMessage[] = "ICEADAPTERPING";
-  static constexpr uint8_t PongMessage[] = "ICEADAPTERPONG";
+  static const std::string PingMessage;
+  static const std::string PongMessage;
 protected:
   void OnMessage(rtc::Message* msg) override;
 
   rtc::scoped_refptr<webrtc::DataChannelInterface> _dataChannel;
   ConnectivityLostCallback _cb;
-  std::optional<std::chrono::steady_clock::time_point> _lastSentPingTime;
-  std::optional<std::chrono::steady_clock::time_point> _lastReceivedPongTime;
+  rtc::Optional<std::chrono::steady_clock::time_point> _lastSentPingTime;
+  rtc::Optional<std::chrono::steady_clock::time_point> _lastReceivedPongTime;
   unsigned int _missedPings{0};
   int _connectionCheckIntervalMs{7000};
 };

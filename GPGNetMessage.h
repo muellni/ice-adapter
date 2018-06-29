@@ -2,7 +2,7 @@
 
 #include <string>
 #include <functional>
-#include <third_party/json/json.h>
+#include "json/json.h"
 
 namespace faf
 {

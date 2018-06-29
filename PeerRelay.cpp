@@ -1,6 +1,7 @@
 #include "PeerRelay.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "logging.h"
 #include "PeerRelayObservers.h"
@@ -169,14 +170,14 @@ void PeerRelay::_createOffer()
                                  options);
 
     /* this is a terrible hack to not call the PeerConnectivityChecker destructor in its own callback */
-    _connectionChecker = std::make_unique<PeerConnectivityChecker>(_dataChannel,
-                                                                   [this]()
+    _connectionChecker.reset(new PeerConnectivityChecker(_dataChannel,
+                                                         [this]()
     {
       _createNewOfferTimer.singleShot(1, [this]()
       {
         _createOffer();
       });
-    });
+    }));
   }
 }
 
@@ -268,13 +269,10 @@ void PeerRelay::_onRemoteMessage(const uint8_t* data, std::size_t size)
     return;
   }
   if (!_isOfferer &&
-      size == sizeof(PeerConnectivityChecker::PingMessage) &&
-      std::equal(data,
-                 data + sizeof(PeerConnectivityChecker::PingMessage),
-                 PeerConnectivityChecker::PingMessage) &&
-      _dataChannel)
+      std::strncmp(PeerConnectivityChecker::PingMessage.c_str(),
+                   reinterpret_cast<const char*>(data), std::min(size, PeerConnectivityChecker::PingMessage.size())) == 0)
   {
-    _dataChannel->Send(webrtc::DataBuffer(rtc::CopyOnWriteBuffer(PeerConnectivityChecker::PongMessage, sizeof(PeerConnectivityChecker::PongMessage)), true));
+    _dataChannel->Send(webrtc::DataBuffer(rtc::CopyOnWriteBuffer(PeerConnectivityChecker::PongMessage.c_str(), PeerConnectivityChecker::PongMessage.size()), true));
     return;
   }
   _localUdpSocket->SendTo(data,
