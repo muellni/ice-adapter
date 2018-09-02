@@ -58,6 +58,7 @@ public:
   bool isConnected() const;
 
 protected:
+  void _createOffer();
   void _close();
   void _reinitPeerconnection();
   void _setIceState(std::string const& state);

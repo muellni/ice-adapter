@@ -132,6 +132,44 @@ void PeerRelay::addIceMessage(Json::Value const& iceMsg)
   }
 }
 
+void PeerRelay::_createOffer()
+{
+  if (_isOfferer)
+  {
+    RELAY_LOG_DEBUG << "creating offer";
+    bool reconnect = true;
+    if (!_dataChannel)
+    {
+      reconnect = false;
+      webrtc::DataChannelInit dataChannelInit;
+      dataChannelInit.ordered = false;
+      dataChannelInit.maxRetransmits = 0;
+      _dataChannel = _peerConnection->CreateDataChannel("faf",
+                                                        &dataChannelInit);
+      _dataChannel->RegisterObserver(_dataChannelObserver.get());
+
+    }
+    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions options;
+    options.offer_to_receive_audio = 0;
+    options.offer_to_receive_video = 0;
+    options.ice_restart = reconnect;
+    _peerConnection->CreateOffer(_createOfferObserver,
+                                 options);
+
+    /* offerers periodically check the connection and may reinitialise it.
+     * The answerer side will recreate the peerconnection on receiving the offer
+     * Using the _reinitTimer is a hack to not call the PeerConnectivityChecker destructor in its own callback */
+    _connectionChecker = std::make_unique<PeerConnectivityChecker>(_dataChannel,
+                                                                   [this]()
+    {
+      _reinitTimer.singleShot(1, [this]()
+      {
+        _createOffer();
+      });
+    });
+  }
+}
+
 void PeerRelay::_close()
 {
   _closing = true;
@@ -167,32 +205,7 @@ void PeerRelay::_reinitPeerconnection()
 
   if (_isOfferer)
   {
-    RELAY_LOG_DEBUG << "creating offer";
-
-    webrtc::DataChannelInit dataChannelInit;
-    dataChannelInit.ordered = false;
-    dataChannelInit.maxRetransmits = 0;
-    _dataChannel = _peerConnection->CreateDataChannel("faf",
-                                                      &dataChannelInit);
-    _dataChannel->RegisterObserver(_dataChannelObserver.get());
-
-    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions options;
-    options.offer_to_receive_audio = 0;
-    options.offer_to_receive_video = 0;
-    _peerConnection->CreateOffer(_createOfferObserver,
-                                 options);
-
-    /* offerers periodically check the connection and may reinitialise it.
-     * The answerer side will recreate the peerconnection on receiving the offer
-     * Using the _reinitTimer is a hack to not call the PeerConnectivityChecker destructor in its own callback */
-    _connectionChecker = std::make_unique<PeerConnectivityChecker>(_dataChannel,
-                                                                   [this]()
-    {
-      _reinitTimer.singleShot(1, [this]()
-      {
-        _reinitPeerconnection();
-      });
-    });
+    _createOffer();
   }
 }
 
@@ -228,7 +241,7 @@ void PeerRelay::_setIceState(std::string const& state)
 
     {
       RELAY_LOG_WARN << "Connection lost, forcing reconnect immediately.";
-      _reinitPeerconnection();
+      _createOffer();
     }
   }
 }
