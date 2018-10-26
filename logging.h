@@ -1,20 +1,45 @@
 #pragma once
 
 #include <string>
-
-#include <webrtc/rtc_base/logging.h>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
 namespace faf
 {
+struct logger
+{
+    logger(std::ostream& os):
+      _os(os)
+    {
+      std::time_t t = std::time(nullptr);
+      std::tm tm = *std::localtime(&t);
+      os << "ICE: " << std::put_time(&tm, "%F-%T ");
+    }
 
-void logging_init(std::string const& verbosity);
-void logging_init_log_dir(std::string const& verbosity,
-                          std::string const& log_directory);
+    ~logger()
+    {
+      _os << _ss.str() << std::endl;
+    }
 
-#define FAF_LOG_TRACE RTC_LOG(LS_SENSITIVE) << "[trace] FAF: "
-#define FAF_LOG_DEBUG RTC_LOG(LS_VERBOSE)   << "[debug] FAF: "
-#define FAF_LOG_INFO  RTC_LOG(LS_INFO)      << "[info] FAF: "
-#define FAF_LOG_WARN  RTC_LOG(LS_WARNING)   << "[warn] FAF: "
-#define FAF_LOG_ERROR RTC_LOG(LS_ERROR)     << "[error] FAF: "
+public:
+    // accepts just about anything
+    template<class T>
+    logger &operator<<(const T &x)
+    {
+      _ss << x;
+      return *this;
+    }
+private:
+    std::ostringstream _ss;
+    std::ostream& _os;
+};
 
 }
+
+#define FAF_LOG_TRACE faf::logger(std::cout) << "[trace] "
+#define FAF_LOG_DEBUG faf::logger(std::cout) << "[debug] "
+#define FAF_LOG_INFO  faf::logger(std::cout) << "[info] "
+#define FAF_LOG_WARN  faf::logger(std::cerr) << "[warn] "
+#define FAF_LOG_ERROR faf::logger(std::cerr) << "[error] "
+

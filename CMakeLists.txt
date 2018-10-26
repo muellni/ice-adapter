@@ -6,6 +6,28 @@ project(faf-ice-adapter
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_subdirectory(re/mk)
+
+include_directories(re/include)
+
+find_package(OpenSSL REQUIRED)
+find_package(Threads)
+find_package(ZLIB)
+
+add_executable(retest
+  IceAlloc.h
+  IceAlloc.cpp
+  logging.h
+  retest3.cpp
+)
+target_link_libraries(retest
+  re
+  ${OPENSSL_LIBRARIES}
+  Threads::Threads
+  ${ZLIB_LIBRARIES}
+)
+
+#[[
 set(WEBRTC_INCLUDE_DIRS "" CACHE PATH "libwebrtc include dir")
 if(NOT EXISTS "${WEBRTC_INCLUDE_DIRS}")
   message(FATAL_ERROR "please specify WEBRTC_INCLUDE_DIRS to point at the include path of the libwebrtc package from https://github.com/FAForever/libwebrtc/releases")
@@ -180,3 +202,4 @@ target_link_libraries(PeerRelayTest
   faficetest
   ${WEBRTC_LIBRARIES}
   )
+]]
