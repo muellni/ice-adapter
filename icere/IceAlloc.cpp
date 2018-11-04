@@ -11,6 +11,11 @@ void dns_handler(int err, const struct sa *srv, void *arg)
   static_cast<IceAlloc*>(arg)->_dns_handler(err, srv);
 }
 
+bool net_ifaddr_handler(const char *ifname, const struct sa *sa, void *arg)
+{
+  return static_cast<IceAlloc*>(arg)->_ifaddr_handler(ifname, sa);
+}
+
 void stun_ind_handler(struct stun_msg *msg, void *arg)
 {
   static_cast<IceAlloc*>(arg)->_stun_ind_handler(msg);
@@ -82,6 +87,7 @@ IceAlloc::IceAlloc():
 
   _dns_alloc();
   _session_alloc();
+  _ice_start();
 }
 
 void IceAlloc::_dns_alloc()
@@ -188,6 +194,7 @@ void IceAlloc::_session_alloc()
 
 void IceAlloc::_ice_start()
 {
+  net_getifaddrs(net_ifaddr_handler, this);
   icem_update(_icem);
   icem_conncheck_start(_icem);
   _send_binding_request();
@@ -265,6 +272,20 @@ void IceAlloc::_dns_handler(int err, const struct sa *srv)
   FAF_LOG_DEBUG << "stun server " << _stunServer << " resolved";
   _send_binding_request();
   //_gather_relayed();
+}
+
+bool IceAlloc::_ifaddr_handler(const char *ifname, const struct sa *sa)
+{
+  FAF_LOG_DEBUG << "ifaddr " << ifname << " ";
+
+  char buf[1024];
+
+  if (re_snprintf(buf, sizeof(buf), "%H", sa_print_addr, sa)>= 0)
+  {
+    FAF_LOG_DEBUG << buf;
+  }
+
+  return false;
 }
 
 void IceAlloc::_conncheck_handler(int err, bool update)

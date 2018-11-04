@@ -739,12 +739,18 @@ static void icetest_check_gatherings(struct ice_test *it)
    * exchange SDP and start conncheck
    */
 
+  int rcands1,rcands2;
+
+  rcands1 = list_count(icem_rcandl(it->a->icem));
+
   err = agent_decode_sdp(it->a, it->b);
   if (err)
     goto out;
   err = agent_decode_sdp(it->b, it->a);
   if (err)
     goto out;
+
+  rcands2 = list_count(icem_rcandl(it->a->icem));
 
   err = verify_after_sdp_exchange(it->a);
   if (err)

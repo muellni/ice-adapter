@@ -24,6 +24,9 @@ protected:
   friend void dns_handler(int err, const struct sa *srv, void *arg);
   void _dns_handler(int err, const struct sa *srv);
 
+  friend bool net_ifaddr_handler(const char *ifname, const struct sa *sa, void *arg);
+  bool _ifaddr_handler(const char *ifname, const struct sa *sa);
+
   friend void conncheck_handler(int err, bool update, void *arg);
   void _conncheck_handler(int err, bool update);
 

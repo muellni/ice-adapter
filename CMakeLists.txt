@@ -8,36 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(re/mk)
 
-include_directories(re/include)
+set(RE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/re/include")
+set(RE_LIBRARIES re)
 
-find_package(OpenSSL REQUIRED)
-find_package(Threads)
-find_package(ZLIB)
-
-add_executable(retest
-  IceAlloc.h
-  IceAlloc.cpp
-  logging.h
-  retest3.cpp
-)
-target_link_libraries(retest
-  re
-  ${OPENSSL_LIBRARIES}
-  Threads::Threads
-  ${ZLIB_LIBRARIES}
-)
-
-add_executable(retest4
-  retest4.cpp
-  stunsrv.cpp
-  turnsrv.cpp
-)
-target_link_libraries(retest4
-  re
-  ${OPENSSL_LIBRARIES}
-  Threads::Threads
-  ${ZLIB_LIBRARIES}
-)
+add_subdirectory(icere)
 
 #[[
 set(WEBRTC_INCLUDE_DIRS "" CACHE PATH "libwebrtc include dir")
