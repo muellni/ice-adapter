@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(faf-ice-adapter
-  LANGUAGES CXX
+  LANGUAGES CXX C
   )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -21,6 +21,18 @@ add_executable(retest
   retest3.cpp
 )
 target_link_libraries(retest
+  re
+  ${OPENSSL_LIBRARIES}
+  Threads::Threads
+  ${ZLIB_LIBRARIES}
+)
+
+add_executable(retest4
+  retest4.cpp
+  stunsrv.cpp
+  turnsrv.cpp
+)
+target_link_libraries(retest4
   re
   ${OPENSSL_LIBRARIES}
   Threads::Threads
